@@ -9,7 +9,7 @@
 **Tour de Mars** is a web-based Mars exploration and extravehicular activity (EVA) planning prototype by **Team 6bit_Larry**, developed for the **2026 NASA Space Apps Challenge**.
 
 **Challenge:** [Interplanetary Survival Guide: Martian Map](https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/)<br>
-**Team:** [Team: 6bit_Larry](https://www.spaceappschallenge.org/2026/find-a-team/6bit_larry/?tab=members)<br> 
+**Team:** [6bit_Larry](https://www.spaceappschallenge.org/2026/find-a-team/6bit_larry/?tab=members)<br> 
 **Live Demo:** [https://tour-de-mars.vercel.app/](https://tour-de-mars.vercel.app/)  
 **MarsWalk Planner (Live):** [https://tour-de-mars.vercel.app/marswalk.html](https://tour-de-mars.vercel.app/marswalk.html)  
 **240s Presentation Video:** [https://youtu.be/hznaf08VCDU](https://youtu.be/hznaf08VCDU)  
