@@ -1,4 +1,4 @@
-# Tour de Mars 🪐
+# Tour de Mars
 
 <p align="center">
   <img src="./favicon.png" alt="Tour de Mars astronaut cat mascot" width="240" />
