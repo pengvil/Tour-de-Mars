@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080a0b">
+  <meta name="description" content="MarsWalk — select a real Jezero base and destinations, build a CTX-derived terrain grid, compare routes, check oxygen reserve, replay the walk, and export a mission report.">
+  <title>MarsWalk — Tour de Mars</title>
+  <link rel="stylesheet" href="marswalk.css">
+  <script src="data/terrain-grid.js"></script>
+  <script defer src="marswalk.js"></script>
+</head>
+<body>
+  <header class="mw-header">
+    <a class="mw-brand" href="index.html"><img src="assets/team-logo.png" alt="Tour de Mars team emblem"><b>TOUR DE MARS</b><small>/ MARSWALK</small></a>
+    <div class="mw-header-status"><i id="headerDot"></i><span id="headerStatus">STARTING MISSION SYSTEMS</span></div>
+    <a class="mw-exit" href="index.html">EXIT ↗</a>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel left-panel">
+      <div class="panel-scroll">
+        <section class="panel-section intro-section">
+          <div class="section-code">JEZ / EVA-01</div>
+          <h1>MarsWalk</h1>
+          <p>Plan directly on real Mars imagery. Terrain calculations activate only when the verified Jezero CTX elevation model is available.</p>
+        </section>
+
+        <section class="panel-section">
+          <div class="panel-title"><span>01</span><b>Terrain source</b></div>
+          <div class="source-card" id="terrainSourceCard">
+            <div class="source-head"><i id="terrainDot"></i><b id="terrainLabel">Checking cache…</b></div>
+            <p id="terrainDetail">Looking for a previously built real-terrain grid.</p>
+            <div class="progress"><i id="terrainProgress"></i></div>
+            <div class="source-actions"><button id="retryTerrain">Retry official DEM</button><label class="file-button">Load local GeoTIFF<input id="terrainFile" type="file" accept=".tif,.tiff,image/tiff"></label></div>
+          </div>
+          <p class="micro">Verified terrain routing requires the CTX DEM. If it is unavailable, you may explore a clearly labeled illustrative sample without measured slope, hazards, or terrain validation.</p>
+          <div class="demo-launch">
+            <div class="demo-launch-heading"><span class="demo-pulse"></span><b>QUICK START · SAMPLE EVA</b></div>
+            <p>Places a sample base and two science stops for exploring the route interface. Actual terrain-aware analysis requires the official CTX elevation model.</p>
+            <button id="startDemo" class="demo-button" type="button">LOAD DEMO EVA <span>→</span></button>
+            <button id="reloadOfficial" class="demo-return" type="button">USE VERIFIED CTX DATA ↗</button>
+          </div>
+        </section>
+
+        <section class="panel-section">
+          <div class="panel-title"><span>02</span><b>Mission points</b></div>
+          <div class="mode-buttons" role="group" aria-label="Map selection mode">
+            <button class="active" data-mode="base">Set base</button><button data-mode="stop">Add stop</button><button data-mode="inspect">Inspect</button>
+          </div>
+          <div id="pointList" class="point-list"><div class="empty-state">Click inside the copper mission zone to set a base.</div></div>
+          <div class="row-actions"><button id="clearPoints">Clear points</button><button id="fitZone">Fit mission zone</button></div>
+        </section>
+
+        <section class="panel-section">
+          <div class="panel-title"><span>03</span><b>Life support model</b></div>
+          <div class="input-grid">
+            <label><span>O₂ capacity</span><div><input id="o2Capacity" type="number" min="100" max="1200" step="10" value="480"><small>L STP</small></div></label>
+            <label><span>Reserve</span><div><input id="o2Reserve" type="number" min="20" max="500" step="10" value="90"><small>L</small></div></label>
+            <label><span>Walking rate</span><div><input id="o2Walk" type="number" min="0.2" max="5" step="0.1" value="1.2"><small>L/min</small></div></label>
+            <label><span>Dwell / stop</span><div><input id="dwellMin" type="number" min="0" max="60" step="1" value="10"><small>min</small></div></label>
+            <label><span>Base pace</span><div><input id="baseSpeed" type="number" min="0.3" max="1.4" step="0.05" value="0.85"><small>m/s</small></div></label>
+            <label><span>Dwell O₂ rate</span><div><input id="o2Dwell" type="number" min="0.1" max="4" step="0.1" value="0.8"><small>L/min</small></div></label>
+          </div>
+          <p class="micro warn">These oxygen and suited-walking values are adjustable planning assumptions, not NASA EVA standards or medical guidance.</p>
+        </section>
+
+        <section class="panel-section">
+          <div class="panel-title"><span>04</span><b>Route objective</b></div>
+          <div class="route-modes" id="routeModes">
+            <button data-route="fast"><span>FAST</span><small>minimum modeled travel time</small></button>
+            <button data-route="safe"><span>SAFE</span><small>strongly avoids steeper / rougher cells</small></button>
+            <button class="active" data-route="balanced"><span>BALANCED</span><small>time + terrain + science context</small></button>
+            <button data-route="science"><span>SCIENCE</span><small>prefers mission-interest anchors</small></button>
+          </div>
+          <button class="plan-button" id="planRoute" disabled>PLAN MARSWALK <span>→</span></button>
+          <button class="compare-button" id="compareRoutes" disabled>COMPARE ALL FOUR</button>
+        </section>
+      </div>
+    </aside>
+
+    <section class="map-column">
+      <div class="map-toolbar">
+        <div class="map-layer-select"><label>BASEMAP</label><select id="basemapSelect"><option value="hirise">HiRISE Jezero — controlled</option><option value="ctx">CTX Jezero — controlled</option><option value="mola">MOLA + HRSC — global</option></select></div>
+        <div class="overlay-toggles"><label><input type="checkbox" id="toggleRisk"><span>Terrain cost</span></label><label><input type="checkbox" id="toggleSlope"><span>Slope</span></label><label><input type="checkbox" id="toggleScience"><span>Science context</span></label><label><input type="checkbox" id="toggleGrid" checked><span>100 m grid</span></label></div>
+        <div class="zoom-group"><button id="zoomOut">−</button><button id="zoomIn">+</button></div>
+      </div>
+      <div class="map-shell" id="mapShell">
+        <canvas id="marsMap" aria-label="Interactive real Mars map of Jezero Crater"></canvas>
+        <div class="map-loading" id="mapLoading"><div class="spinner"></div><b>Connecting to NASA/JPL Mars Trek</b><span>Loading a real Jezero basemap…</span></div>
+        <div class="map-toast" id="mapToast" hidden></div>
+        <div class="map-provenance" aria-label="Map and terrain sources">
+          <span class="provenance-head"><i></i> OFFICIAL SOURCE DATA</span>
+          <div><small>BASEMAP</small><b id="mapProvenanceBasemap">NASA/JPL Mars Trek · HiRISE</b></div>
+          <div><small>TERRAIN</small><b id="mapProvenanceTerrain">USGS/NASA CTX · awaiting data</b></div>
+          <div><small>ANALYSIS</small><b>Tour de Mars model</b></div>
+          <div class="provenance-links"><a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener noreferrer">NASA MARS TREK ↗</a><a href="data-audit.html">DATA AUDIT ↗</a></div>
+        </div>
+        <div class="map-preview-alert" id="mapPreviewAlert" hidden>ILLUSTRATIVE EVA · NO VERIFIED ELEVATION OR SLOPE DATA</div>
+        <div class="map-coords" id="mapCoords">18.44° N · 77.45° E</div>
+        <div class="map-legend"><span><i class="base"></i>Base</span><span><i class="stop"></i>Stop</span><span><i class="route"></i>Route</span><span><i class="zone"></i>Mission zone</span></div>
+        <div class="playback-hud" id="playbackHud" hidden><div><small>ELAPSED</small><b id="playTime">00:00</b></div><div><small>O₂ USED</small><b id="playO2">0 L</b></div><div><small>RETURN MARGIN</small><b id="playMargin">—</b></div><button id="stopPlayback">STOP</button></div>
+      </div>
+      <div class="map-footer"><span id="mapSource">Basemap: NASA/JPL Mars Trek</span><span>NASA IMAGERY · USGS TERRAIN · TOUR DE MARS ROUTING MODEL</span></div>
+    </section>
+
+    <aside class="panel right-panel">
+      <div class="panel-scroll">
+        <section class="panel-section inspector-section">
+          <div class="panel-title"><span>LIVE</span><b>Cell inspector</b></div>
+          <div class="inspector" id="inspector">
+            <div class="inspector-empty">Move over the mission zone or use Inspect mode.</div>
+          </div>
+        </section>
+
+        <section class="panel-section route-summary-section">
+          <div class="panel-title"><span>05</span><b>Route report</b></div>
+          <div id="routeSummary" class="route-summary"><div class="empty-state">Set a base and at least one stop, then plan a route.</div></div>
+          <div class="report-actions" id="reportActions" hidden><button id="playRoute">Replay walk</button><button id="exportReport">Export JSON</button><button id="printReport">Print report</button></div>
+        </section>
+
+        <section class="panel-section compare-section" id="compareSection" hidden>
+          <div class="panel-title"><span>06</span><b>Route comparison</b></div>
+          <div id="compareTable"></div>
+        </section>
+
+        <section class="panel-section method-section">
+          <div class="panel-title"><span>DATA</span><b>What is real here?</b></div>
+          <dl>
+            <div><dt>Map imagery</dt><dd>NASA/JPL Mars Trek WMTS</dd></div>
+            <div><dt>Terrain</dt><dd>USGS Mars 2020 MRO/CTX DTM, 20 m posts</dd></div>
+            <div><dt>Route cells</dt><dd>100 m summaries computed from the DTM</dd></div>
+            <div><dt>Science layer</dt><dd>Contextual mission-interest anchors, not mineral abundance</dd></div>
+            <div><dt>O₂ / pace</dt><dd>User-adjustable modeling assumptions</dd></div>
+          </dl>
+          <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener noreferrer" class="audit-link">Official NASA Mars Trek ↗</a>
+          <a href="https://astrogeology-usgs.hub.arcgis.com/pages/interactive-maps-mars" target="_blank" rel="noopener noreferrer" class="audit-link">USGS Mars geology ↗</a>
+          <a href="data-audit.html" class="audit-link">Open full data audit →</a>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="reportDialog" class="report-dialog"><button class="dialog-close" id="closeReport">×</button><div id="reportDocument"></div></dialog>
+</body>
+</html>
