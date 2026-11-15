@@ -13,6 +13,7 @@
 **Live Demo:** [https://tour-de-mars.vercel.app/](https://tour-de-mars.vercel.app/)  
 **MarsWalk Planner (Live):** [https://tour-de-mars.vercel.app/marswalk.html](https://tour-de-mars.vercel.app/marswalk.html)  
 **240s Presentation Video:** [https://youtu.be/hznaf08VCDU](https://youtu.be/hznaf08VCDU)  
+**30 Seconds of Glory:** [https://www.youtube.com/watch?v=oiWRDmifR6w](https://www.youtube.com/watch?v=oiWRDmifR6w)  
 **Source Repository:** [https://github.com/pengvil/Tour-de-Mars](https://github.com/pengvil/Tour-de-Mars)  
 
 > **Deployment note:** The live application is hosted on Vercel. For local execution and offline demonstration, follow the instructions in the [Getting started](#getting-started) section below.
